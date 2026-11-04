@@ -28,6 +28,7 @@ export interface Product {
   voltage: string; // e.g. "AC 115V / 230V – 50/60 Hz"
   inputOutput: string; // e.g. "2x Entradas Combo + Saída XLR Balanceada"
   images: string[];
+  videos?: string[];
   manualUrl: string;
   manualTitle: string;
   description: string;
@@ -37,6 +38,7 @@ export interface Product {
     description: string;
   }[];
   isFeatured?: boolean;
+  updatedAt?: unknown;
 }
 
 export type LeadStatus = 'novo' | 'em_atendimento' | 'proposta_enviada' | 'fechado';

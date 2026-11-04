@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { calculateSplAtDistance, calculateDelayMs } from '../utils/audioCalculator';
-import { Sliders, Volume2, Clock, CheckCircle2, ArrowUpRight, Activity } from 'lucide-react';
+import { CheckCircle2, ArrowUpRight } from 'lucide-react';
 
 interface AcousticCalculatorProps {
   onOpenLeadWithSpecs: (note: string) => void;
@@ -26,11 +26,11 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-20">
           <div className="inline-flex items-center gap-2.5 mb-3.5">
-            <span className="w-8 h-[1px] bg-[#C7A66A]" />
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#C7A66A] font-semibold">
+            <span className="w-8 h-[1px] bg-gradient-to-r from-[#2563EB] to-[#7EC2FB]" />
+            <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#60A5FA] font-semibold">
               Software de Eletroacústica Aplicada
             </span>
-            <span className="w-8 h-[1px] bg-[#C7A66A]" />
+            <span className="w-8 h-[1px] bg-gradient-to-r from-[#7EC2FB] to-[#2563EB]" />
           </div>
           <h2 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl text-[#F5F5F2] tracking-tight uppercase leading-[1.08]">
             Simulador de Pressão Sonora & Delay
@@ -56,12 +56,12 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                     onClick={() => setSelectedProductSpl(132)}
                     className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
                       selectedProductSpl === 132
-                        ? 'bg-[#181818] border-[#C7A66A] text-[#F5F5F2] shadow-[0_0_15px_rgba(199,166,106,0.15)]'
+                        ? 'bg-[#181818] border-[#3B82F6] text-[#F5F5F2] shadow-[0_0_15px_rgba(59,130,246,0.25)]'
                         : 'bg-[#121212] border-white/[0.06] text-[#B8B8B8] hover:border-white/20'
                     }`}
                   >
                     <span className="font-heading font-bold text-base block text-[#F5F5F2]">KRS315A (3000W)</span>
-                    <span className="text-xs font-mono text-[#C7A66A] mt-1 block">132 dB SPL @ 1m</span>
+                    <span className="text-xs font-mono text-[#60A5FA] mt-1 block">132 dB SPL @ 1m</span>
                   </button>
 
                   <button
@@ -69,12 +69,12 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                     onClick={() => setSelectedProductSpl(127)}
                     className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
                       selectedProductSpl === 127
-                        ? 'bg-[#181818] border-[#C7A66A] text-[#F5F5F2] shadow-[0_0_15px_rgba(199,166,106,0.15)]'
+                        ? 'bg-[#181818] border-[#3B82F6] text-[#F5F5F2] shadow-[0_0_15px_rgba(59,130,246,0.25)]'
                         : 'bg-[#121212] border-white/[0.06] text-[#B8B8B8] hover:border-white/20'
                     }`}
                   >
                     <span className="font-heading font-bold text-base block text-[#F5F5F2]">KRS212SB (1000W)</span>
-                    <span className="text-xs font-mono text-[#C7A66A] mt-1 block">127 dB SPL @ 1m</span>
+                    <span className="text-xs font-mono text-[#60A5FA] mt-1 block">127 dB SPL @ 1m</span>
                   </button>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
               <div>
                 <div className="flex justify-between items-center text-xs font-mono mb-3">
                   <span className="text-[#B8B8B8] uppercase tracking-wider">Distância até a Última Fileira:</span>
-                  <span className="text-[#C7A66A] font-bold text-sm bg-[#181818] px-2.5 py-1 rounded-[2px] border border-white/[0.08]">
+                  <span className="text-[#60A5FA] font-bold text-sm bg-[#181818] px-2.5 py-1 rounded-[2px] border border-white/[0.08]">
                     {distance} metros
                   </span>
                 </div>
@@ -94,7 +94,7 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                   step="1"
                   value={distance}
                   onChange={e => setDistance(Number(e.target.value))}
-                  className="w-full accent-[#C7A66A] bg-[#222222] h-2 rounded cursor-pointer"
+                  className="w-full accent-[#3B82F6] bg-[#222222] h-2 rounded cursor-pointer"
                   aria-label="Distância em metros"
                 />
                 <div className="flex justify-between text-[10px] font-mono text-[#7A7A7A] mt-2">
@@ -119,7 +119,7 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                   step="1"
                   value={temp}
                   onChange={e => setTemp(Number(e.target.value))}
-                  className="w-full accent-[#C7A66A] bg-[#222222] h-2 rounded cursor-pointer"
+                  className="w-full accent-[#3B82F6] bg-[#222222] h-2 rounded cursor-pointer"
                   aria-label="Temperatura do ar em Celsius"
                 />
               </div>
@@ -132,7 +132,7 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                 <select
                   value={venueType}
                   onChange={e => setVenueType(e.target.value)}
-                  className="w-full p-3.5 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono uppercase focus:outline-none focus:border-[#C7A66A]"
+                  className="w-full p-3.5 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono uppercase focus:outline-none focus:border-[#3B82F6]"
                 >
                   <option value="templo">Igreja / Templo Religioso (Prioridade em Voz, Inteligibilidade e Louvor)</option>
                   <option value="palco">Show ao Vivo / Palco / Festival (Pressão Extrema e Dinâmica de Banda)</option>
@@ -148,10 +148,10 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
           </div>
 
           {/* Telemetry Output Cockpit */}
-          <div className="lg:col-span-6 p-8 rounded-[4px] bg-gradient-to-br from-[#121212] via-[#161616] to-[#0E0E0E] border border-[#C7A66A]/30 flex flex-col justify-between shadow-2xl">
+          <div className="lg:col-span-6 p-8 rounded-[4px] bg-gradient-to-br from-[#121212] via-[#161616] to-[#0E0E0E] border border-[#3B82F6]/40 flex flex-col justify-between shadow-2xl">
             <div>
               <div className="flex items-center justify-between pb-5 border-b border-white/[0.08]">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#C7A66A] font-semibold">
+                <span className="text-xs font-mono uppercase tracking-widest text-[#60A5FA] font-semibold">
                   Telemetria Eletroacústica Calculada
                 </span>
                 <span className="text-[10px] font-mono text-[#B8B8B8] px-2 py-0.5 rounded-[2px] bg-white/[0.04]">
@@ -166,7 +166,7 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                     SPL Percebido a {distance}m
                   </span>
                   <div className="text-3xl sm:text-4xl font-heading font-extrabold text-[#F5F5F2]">
-                    {splResult.perceivedSpl} <span className="text-sm font-mono text-[#C7A66A] font-medium">dB SPL</span>
+                    {splResult.perceivedSpl} <span className="text-sm font-mono text-[#60A5FA] font-medium">dB SPL</span>
                   </div>
                   <span className="text-[11px] font-mono text-[#7A7A7A] mt-2 block">
                     Atenuação: -{splResult.attenuationDb} dB
@@ -177,7 +177,7 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
                   <span className="text-[10px] font-mono text-[#B8B8B8] uppercase block mb-1.5">
                     Delay Temporal de Torre
                   </span>
-                  <div className="text-3xl sm:text-4xl font-heading font-extrabold text-[#C7A66A]">
+                  <div className="text-3xl sm:text-4xl font-heading font-extrabold text-[#7EC2FB]">
                     {delayMs} <span className="text-sm font-mono text-[#F5F5F2] font-medium">ms</span>
                   </div>
                   <span className="text-[11px] font-mono text-[#7A7A7A] mt-2 block">
@@ -189,13 +189,13 @@ export const AcousticCalculator: React.FC<AcousticCalculatorProps> = ({ onOpenLe
               {/* Technical Assessment Message */}
               <div className="mt-6 p-5 rounded-[3px] bg-[#0E0E0E] border border-white/[0.08]">
                 <div className="flex items-center gap-2 text-[#F5F5F2] font-heading font-bold text-sm mb-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#C7A66A]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#60A5FA]" />
                   <span>Diagnóstico Técnico WOX:</span>
                 </div>
                 <p className="text-xs text-[#B8B8B8] font-normal leading-relaxed">
                   {splResult.safetyDescription}
                 </p>
-                <div className="mt-4 text-[11px] font-mono text-[#C7A66A] border-t border-white/[0.06] pt-3">
+                <div className="mt-4 text-[11px] font-mono text-[#60A5FA] border-t border-white/[0.06] pt-3">
                   Recomendação de sistema: {distance > 25 ? 'Recomendado cluster de 2x KRS315A por lado com subwoofers alinhados temporalmente.' : '1 par de KRS315A entrega ampla cobertura estéreo com mais de 10dB de headroom dinâmico.'}
                 </div>
               </div>

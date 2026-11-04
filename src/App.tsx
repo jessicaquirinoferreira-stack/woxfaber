@@ -15,11 +15,12 @@ import { AdminPanel } from './components/AdminPanel';
 import { LandingPageGenerator } from './components/LandingPageGenerator';
 import { Footer } from './components/Footer';
 import { CinematicIntro } from './components/CinematicIntro';
-import { ArrowUpRight, Volume2, ShieldCheck, X, Mail } from 'lucide-react';
+import { VirtualAssistantWidget } from './components/VirtualAssistantWidget';
+import { ArrowUpRight, Mail } from 'lucide-react';
 
 export default function App() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [config, setConfig] = useState<SiteConfig>(AudioStore.getConfig());
+  const [products, setProducts] = useState<Product[]>(() => AudioStore.getProducts());
+  const [config, setConfig] = useState<SiteConfig>(() => AudioStore.getConfig());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [active3DProduct, setActive3DProduct] = useState<Product | null>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
@@ -32,9 +33,20 @@ export default function App() {
   const [dedicatedLpProduct, setDedicatedLpProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    // Initial data load
-    refreshProducts();
-    refreshConfig();
+    // Subscribe to real-time Firebase Firestore updates for products & site configuration
+    const unsubProducts = AudioStore.subscribeProducts(liveProducts => {
+      setProducts(liveProducts);
+      setSelectedProduct(prev =>
+        prev ? liveProducts.find(p => p.id === prev.id) || prev : null
+      );
+      setDedicatedLpProduct(prev =>
+        prev ? liveProducts.find(p => p.id === prev.id || p.slug === prev.slug) || prev : null
+      );
+    });
+
+    const unsubConfig = AudioStore.subscribeConfig(liveConfig => {
+      setConfig(liveConfig);
+    });
 
     // Check URL parameters for direct Landing Page navigation
     const params = new URLSearchParams(window.location.search);
@@ -45,6 +57,11 @@ export default function App() {
         setDedicatedLpProduct(match);
       }
     }
+
+    return () => {
+      unsubProducts();
+      unsubConfig();
+    };
   }, []);
 
   const refreshProducts = () => {
@@ -83,7 +100,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] text-[#F5F5F2] selection:bg-[#C7A66A]/20 selection:text-[#C7A66A]">
+    <div className="min-h-screen bg-[#080808] text-[#F5F5F2] selection:bg-[#2563EB]/30 selection:text-[#7EC2FB]">
       {/* Luxury Navigation Header with Official Logo */}
       <Navbar
         onOpenLeadModal={handleOpenLeadModal}
@@ -129,12 +146,12 @@ export default function App() {
         <section className="relative py-28 bg-[#101010] border-t border-white/10 overflow-hidden text-center">
           <div className="absolute inset-0 bg-grain opacity-25 pointer-events-none" />
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <span className="text-[10px] font-mono tracking-[0.25em] text-[#C7A66A] uppercase block mb-3 font-semibold">
+            <span className="text-[10px] font-mono tracking-[0.25em] text-[#60A5FA] uppercase block mb-3 font-semibold">
               Construa a Nova Referência de Áudio
             </span>
             <h2 className="font-heading font-extrabold text-3xl sm:text-5xl md:text-6xl text-[#F5F5F2] tracking-tight uppercase mb-6 leading-tight">
               PRONTO PARA ELEVAR O <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#E2C99A] to-[#C7A66A]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#7EC2FB] to-[#2563EB]">
                 PADRÃO DO SEU SOM?
               </span>
             </h2>
@@ -148,14 +165,14 @@ export default function App() {
                 className="btn-primary w-full sm:w-auto"
               >
                 <span>FALAR COM UM ESPECIALISTA AGORA</span>
-                <ArrowUpRight className="w-4 h-4 text-black" />
+                <ArrowUpRight className="w-4 h-4 text-white" />
               </button>
 
               <a
                 href="mailto:woxfaberbrasil@gmail.com?subject=Consulta%20T%C3%A9cnica%20Direta%20-%20WOX%20FABER&body=Ol%C3%A1%20Engenharia%20WOX%20FABER%2C%0A%0AGostaria%20de%20solicitar%20uma%20consulta%20t%C3%A9cnica%20para%20meu%20projeto%20ac%C3%BAstico."
                 className="btn-secondary w-full sm:w-auto"
               >
-                <Mail className="w-4 h-4 mr-1 text-[#C7A66A]" />
+                <Mail className="w-4 h-4 mr-1 text-[#60A5FA]" />
                 <span>ENVIAR E-MAIL PARA ENGENHARIA</span>
               </a>
             </div>
@@ -198,7 +215,7 @@ export default function App() {
         defaultProductName={leadProductName}
         defaultNote={leadDefaultNote}
         onLeadSubmitted={() => {
-          // Refresh leads in background
+          // Real-time Firestore listener updates automatically
         }}
       />
 
@@ -220,6 +237,9 @@ export default function App() {
           onComplete={() => setShowIntro(false)}
         />
       )}
+
+      {/* Floating Human Virtual Assistant Widget on the Left Side */}
+      <VirtualAssistantWidget />
     </div>
   );
 }

@@ -35,13 +35,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-20 gap-8">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2.5 mb-3.5">
-              <span className="w-8 h-[1px] bg-[#C7A66A]" />
-              <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#C7A66A] font-semibold">
+              <span className="w-8 h-[1px] bg-[#3B82F6]" />
+              <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#60A5FA] font-semibold">
                 Catálogo de Engenharia Eletroacústica
               </span>
             </div>
             <h2 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl text-[#F5F5F2] tracking-tight uppercase leading-[1.08]">
-              Linha Profissional <span className="text-[#C7A66A]">KAIROS</span>
+              Linha Profissional <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60A5FA] to-[#3B82F6]">KAIROS</span>
             </h2>
             <p className="mt-5 text-base text-[#B8B8B8] font-normal leading-relaxed">
               Equipamentos calibrados em laboratório para pressão sonora extrema sem distorção mecânica. Inspecione os detalhes estruturais em 3D e consulte as fichas técnicas de homologação.
@@ -56,7 +56,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 onClick={() => setActiveCategory(cat.id)}
                 className={`px-5 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                   activeCategory === cat.id
-                    ? 'bg-[#C7A66A] text-[#080808] font-bold shadow-md'
+                    ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-md shadow-blue-500/20'
                     : 'text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/[0.03]'
                 }`}
               >
@@ -84,7 +84,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
                 {/* Floating Metric Badges */}
                 <div className="absolute top-4 left-4 flex flex-col gap-1.5">
-                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-[2px] bg-[#080808]/90 text-[#C7A66A] border border-[#C7A66A]/35 backdrop-blur-md font-semibold">
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-[2px] bg-[#080808]/90 text-[#60A5FA] border border-[#3B82F6]/40 backdrop-blur-md font-semibold">
                     {product.power}
                   </span>
                   <span className="text-[10px] font-mono px-2.5 py-1 rounded-[2px] bg-[#080808]/90 text-[#F5F5F2] border border-white/10 backdrop-blur-md">
@@ -95,10 +95,10 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 {/* 3D Viewer Inspection Trigger */}
                 <button
                   onClick={() => onOpen3D(product)}
-                  className="btn-technical absolute bottom-4 right-4 bg-[#080808]/90 backdrop-blur-md hover:border-[#C7A66A]"
+                  className="btn-technical absolute bottom-4 right-4 bg-[#080808]/90 backdrop-blur-md hover:border-[#3B82F6]"
                   title="Abrir estúdio 3D interativo"
                 >
-                  <Box className="w-3.5 h-3.5 text-[#C7A66A]" />
+                  <Box className="w-3.5 h-3.5 text-[#60A5FA]" />
                   <span>Inspecionar 3D</span>
                 </button>
               </div>
@@ -109,10 +109,10 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   <span className="text-[10px] font-mono text-[#B8B8B8] uppercase tracking-[0.2em] block mb-1">
                     {product.categoryLabel}
                   </span>
-                  <h3 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#F5F5F2] group-hover:text-[#E2C99A] transition-colors mb-2">
+                  <h3 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#F5F5F2] group-hover:text-[#7EC2FB] transition-colors mb-2">
                     {product.name}
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#C7A66A] font-mono mb-4 leading-snug">
+                  <p className="text-xs sm:text-sm text-[#60A5FA] font-mono mb-4 leading-snug">
                     {product.tagline}
                   </p>
                   <p className="text-xs text-[#B8B8B8] font-normal line-clamp-3 mb-6 leading-relaxed">
@@ -135,7 +135,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   <div className="space-y-2 mb-6">
                     {product.highlights.slice(0, 2).map((h, i) => (
                       <div key={i} className="flex items-start gap-2 text-xs text-[#B8B8B8]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C7A66A] mt-1.5 shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] mt-1.5 shrink-0" />
                         <span className="leading-snug">{h}</span>
                       </div>
                     ))}
@@ -149,7 +149,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     className="btn-primary flex-1 py-3 text-xs"
                   >
                     <span>Especificações</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-white" />
                   </button>
 
                   <a
@@ -157,11 +157,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-technical py-3 px-3.5 hover:text-[#C7A66A]"
+                    className="btn-technical py-3 px-3.5 hover:text-[#60A5FA]"
                     title="Baixar Manual Oficial em PDF"
                     aria-label={`Baixar Manual Oficial ${product.name} em PDF`}
                   >
-                    <Download className="w-4 h-4 text-[#C7A66A]" />
+                    <Download className="w-4 h-4 text-[#60A5FA]" />
                   </a>
                 </div>
               </div>

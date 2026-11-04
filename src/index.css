@@ -6,9 +6,11 @@
     --black-sec: #101010;
     --graphite: #181818;
     --graphite-light: #242424;
-    --gold-main: #C7A66A;
-    --gold-light: #E2C99A;
-    --gold-dark: #A58548;
+    --blue-deep: #1D4ED8;
+    --blue-main: #2563EB;
+    --blue-mid: #3B82F6;
+    --blue-light: #60A5FA;
+    --blue-cyan: #7EC2FB;
     --white-ice: #F5F5F2;
     --gray-text: #B8B8B8;
     --gray-muted: #7A7A7A;
@@ -44,7 +46,7 @@
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C7A66A;
+  background: #3B82F6;
 }
 
 /* Reusable Rounded Button System */
@@ -53,8 +55,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #C7A66A 0%, #D4B67C 50%, #B89658 100%);
-  color: #080808;
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 35%, #3B82F6 70%, #7EC2FB 100%);
+  color: #FFFFFF;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   font-size: 0.8125rem;
@@ -62,7 +64,7 @@
   text-transform: uppercase;
   padding: 0.875rem 2rem;
   border-radius: 9999px;
-  box-shadow: 0 4px 18px rgba(199, 166, 106, 0.22);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   position: relative;
@@ -70,8 +72,8 @@
 }
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 26px rgba(199, 166, 106, 0.36);
-  filter: brightness(1.04);
+  box-shadow: 0 8px 28px rgba(59, 130, 246, 0.55);
+  filter: brightness(1.08);
 }
 .btn-primary:active {
   transform: translateY(0);
@@ -91,17 +93,17 @@
   text-transform: uppercase;
   padding: 0.875rem 2rem;
   border-radius: 9999px;
-  border: 1px solid rgba(199, 166, 106, 0.35);
+  border: 1px solid rgba(59, 130, 246, 0.4);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   backdrop-filter: blur(8px);
 }
 .btn-secondary:hover {
-  background-color: #181818;
-  border-color: #C7A66A;
-  color: #E2C99A;
+  background-color: #141824;
+  border-color: #3B82F6;
+  color: #7EC2FB;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.3);
 }
 .btn-secondary:active {
   transform: translateY(0);
@@ -125,9 +127,9 @@
   cursor: pointer;
 }
 .btn-technical:hover {
-  background-color: #1c1c1c;
+  background-color: #181d28;
   color: #F5F5F2;
-  border-color: rgba(199, 166, 106, 0.4);
+  border-color: rgba(59, 130, 246, 0.5);
 }
 
 /* Subtle luxury card styling */
@@ -138,14 +140,14 @@
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card-premium:hover {
-  border-color: rgba(199, 166, 106, 0.35);
-  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(199, 166, 106, 0.12);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(59, 130, 246, 0.2);
   transform: translateY(-2px);
 }
 
 /* Hairline borders */
-.hairline-gold {
-  border: 1px solid rgba(199, 166, 106, 0.28);
+.hairline-blue, .hairline-gold {
+  border: 1px solid rgba(59, 130, 246, 0.35);
 }
 .hairline-subtle {
   border: 1px solid rgba(255, 255, 255, 0.07);

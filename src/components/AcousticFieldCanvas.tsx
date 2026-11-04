@@ -113,8 +113,8 @@ export const AcousticFieldCanvas: React.FC<{ className?: string }> = ({ classNam
             ctx.lineTo(x, y);
           }
         }
-        const alpha = Math.max(0.02, 0.12 - (r / rows) * 0.07);
-        ctx.strokeStyle = `rgba(199, 166, 106, ${alpha})`;
+        const alpha = Math.max(0.02, 0.15 - (r / rows) * 0.08);
+        ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
         ctx.stroke();
       }
 
@@ -123,12 +123,12 @@ export const AcousticFieldCanvas: React.FC<{ className?: string }> = ({ classNam
       const baseSpeed = 1.5;
       for (let i = 0; i < numRings; i++) {
         const radius = ((time * 30 * baseSpeed + (i * 90)) % (width * 0.65));
-        const ringAlpha = Math.max(0, (1 - radius / (width * 0.65)) * 0.18);
+        const ringAlpha = Math.max(0, (1 - radius / (width * 0.65)) * 0.22);
 
         ctx.beginPath();
         ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(199, 166, 106, ${ringAlpha})`;
-        ctx.lineWidth = i % 2 === 0 ? 1.2 : 0.6;
+        ctx.strokeStyle = i % 2 === 0 ? `rgba(96, 165, 250, ${ringAlpha})` : `rgba(37, 99, 235, ${ringAlpha * 0.8})`;
+        ctx.lineWidth = i % 2 === 0 ? 1.4 : 0.8;
         ctx.stroke();
       }
 
@@ -141,7 +141,7 @@ export const AcousticFieldCanvas: React.FC<{ className?: string }> = ({ classNam
           y: mouseY,
           radius: 8,
           maxRadius: Math.max(width, height) * 0.55,
-          alpha: 0.35,
+          alpha: 0.45,
           speed: 2.8,
         });
       }
@@ -157,30 +157,30 @@ export const AcousticFieldCanvas: React.FC<{ className?: string }> = ({ classNam
         }
 
         const gradient = ctx.createRadialGradient(p.x, p.y, p.radius * 0.85, p.x, p.y, p.radius);
-        gradient.addColorStop(0, 'rgba(199, 166, 106, 0)');
-        gradient.addColorStop(0.5, `rgba(199, 166, 106, ${p.alpha * 0.4})`);
-        gradient.addColorStop(1, 'rgba(199, 166, 106, 0)');
+        gradient.addColorStop(0, 'rgba(37, 99, 235, 0)');
+        gradient.addColorStop(0.5, `rgba(96, 165, 250, ${p.alpha * 0.45})`);
+        gradient.addColorStop(1, 'rgba(126, 194, 251, 0)');
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(199, 166, 106, ${p.alpha})`;
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = `rgba(126, 194, 251, ${p.alpha})`;
+        ctx.lineWidth = 1.6;
         ctx.stroke();
       }
 
       // 4. Acoustic Transducer Focal Indicator
-      const glowGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 140);
-      glowGrad.addColorStop(0, 'rgba(199, 166, 106, 0.12)');
-      glowGrad.addColorStop(0.5, 'rgba(199, 166, 106, 0.03)');
+      const glowGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 150);
+      glowGrad.addColorStop(0, 'rgba(59, 130, 246, 0.22)');
+      glowGrad.addColorStop(0.5, 'rgba(37, 99, 235, 0.05)');
       glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
       ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(mouseX, mouseY, 140, 0, Math.PI * 2);
+      ctx.arc(mouseX, mouseY, 150, 0, Math.PI * 2);
       ctx.fill();
 
       // Precision crosshair / acoustic phase center
-      ctx.strokeStyle = 'rgba(199, 166, 106, 0.4)';
+      ctx.strokeStyle = 'rgba(96, 165, 250, 0.55)';
       ctx.lineWidth = 1;
       const chSize = 10;
 
@@ -193,7 +193,7 @@ export const AcousticFieldCanvas: React.FC<{ className?: string }> = ({ classNam
 
       ctx.beginPath();
       ctx.arc(mouseX, mouseY, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#C7A66A';
+      ctx.fillStyle = '#60A5FA';
       ctx.fill();
 
       animationFrameId = requestAnimationFrame(render);

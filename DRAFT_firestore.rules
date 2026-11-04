@@ -1,0 +1,179 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return (isSignedIn() && request.auth.token.email == 'jonasjessicalove@gmail.com' && request.auth.token.email_verified == true) ||
+             (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll([
+        'id', 'slug', 'name', 'tagline', 'category', 'categoryLabel',
+        'type', 'power', 'maxSpl', 'freqResponse', 'ampClass',
+        'lfTransducer', 'dspFeatures', 'dimensions', 'weight',
+        'voltage', 'inputOutput', 'images', 'manualUrl',
+        'manualTitle', 'description', 'highlights', 'applications'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'slug', 'name', 'tagline', 'category', 'categoryLabel',
+        'type', 'power', 'maxSpl', 'freqResponse', 'ampClass',
+        'lfTransducer', 'hfTransducer', 'crossover', 'coverage',
+        'dspFeatures', 'dimensions', 'weight', 'voltage',
+        'inputOutput', 'images', 'videos', 'manualUrl',
+        'manualTitle', 'description', 'highlights', 'applications',
+        'isFeatured', 'updatedAt'
+      ]) &&
+      data.id is string && data.id.size() >= 1 && data.id.size() <= 128 && data.id.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.slug is string && data.slug.size() >= 1 && data.slug.size() <= 128 && data.slug.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 160 &&
+      data.tagline is string && data.tagline.size() <= 300 &&
+      data.category is string && data.category in ['all', 'caixas-ativas', 'subwoofers', 'amplificadores-rf', 'processadores-rf', 'microfones'] &&
+      data.categoryLabel is string && data.categoryLabel.size() <= 120 &&
+      data.type is string && data.type.size() <= 200 &&
+      data.power is string && data.power.size() <= 100 &&
+      data.maxSpl is string && data.maxSpl.size() <= 100 &&
+      data.freqResponse is string && data.freqResponse.size() <= 200 &&
+      data.ampClass is string && data.ampClass.size() <= 200 &&
+      data.lfTransducer is string && data.lfTransducer.size() <= 200 &&
+      (!('hfTransducer' in data) || (data.hfTransducer is string && data.hfTransducer.size() <= 200)) &&
+      (!('crossover' in data) || (data.crossover is string && data.crossover.size() <= 100)) &&
+      (!('coverage' in data) || (data.coverage is string && data.coverage.size() <= 100)) &&
+      data.dspFeatures is string && data.dspFeatures.size() <= 500 &&
+      data.dimensions is string && data.dimensions.size() <= 120 &&
+      data.weight is string && data.weight.size() <= 80 &&
+      data.voltage is string && data.voltage.size() <= 120 &&
+      data.inputOutput is string && data.inputOutput.size() <= 250 &&
+      data.images is list && data.images.size() >= 1 && data.images.size() <= 20 && data.images[0] is string && data.images[0].size() <= 1000 &&
+      (!('videos' in data) || (data.videos is list && data.videos.size() <= 10 && (data.videos.size() == 0 || (data.videos[0] is string && data.videos[0].size() <= 1000)))) &&
+      data.manualUrl is string && data.manualUrl.size() <= 1000 &&
+      data.manualTitle is string && data.manualTitle.size() <= 250 &&
+      data.description is string && data.description.size() <= 4000 &&
+      data.highlights is list && data.highlights.size() <= 15 && (data.highlights.size() == 0 || (data.highlights[0] is string && data.highlights[0].size() <= 400)) &&
+      data.applications is list && data.applications.size() <= 10 && (data.applications.size() == 0 || data.applications[0] is map) &&
+      (!('isFeatured' in data) || data.isFeatured is bool);
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll([
+        'id', 'name', 'email', 'phone', 'venueType', 'message', 'status', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'name', 'email', 'phone', 'venueType', 'message', 'productId', 'productName', 'status', 'createdAt'
+      ]) &&
+      data.id is string && data.id.size() >= 1 && data.id.size() <= 128 && data.id.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.name is string && data.name.size() >= 2 && data.name.size() <= 160 &&
+      data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+      data.phone is string && data.phone.size() <= 50 &&
+      data.venueType is string && data.venueType.size() <= 160 &&
+      data.message is string && data.message.size() <= 3000 &&
+      (!('productId' in data) || (data.productId is string && data.productId.size() <= 128)) &&
+      (!('productName' in data) || (data.productName is string && data.productName.size() <= 160)) &&
+      data.status is string && data.status in ['novo', 'em_atendimento', 'proposta_enviada', 'fechado'] &&
+      data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidSiteConfig(data) {
+      return data.keys().hasAll([
+        'heroTitle', 'heroSubtitle', 'heroOriginText',
+        'contactWhatsapp', 'contactPhone', 'contactEmail',
+        'emergencyTechSupport', 'showAnnouncement'
+      ]) &&
+      data.keys().hasOnly([
+        'heroTitle', 'heroSubtitle', 'heroOriginText',
+        'contactWhatsapp', 'contactPhone', 'contactEmail',
+        'emergencyTechSupport', 'announcementText', 'showAnnouncement'
+      ]) &&
+      data.heroTitle is string && data.heroTitle.size() >= 1 && data.heroTitle.size() <= 300 &&
+      data.heroSubtitle is string && data.heroSubtitle.size() >= 1 && data.heroSubtitle.size() <= 600 &&
+      data.heroOriginText is string && data.heroOriginText.size() <= 1200 &&
+      data.contactWhatsapp is string && data.contactWhatsapp.size() <= 60 &&
+      data.contactPhone is string && data.contactPhone.size() <= 60 &&
+      data.contactEmail is string && data.contactEmail.size() <= 200 &&
+      data.emergencyTechSupport is string && data.emergencyTechSupport.size() <= 400 &&
+      (!('announcementText' in data) || (data.announcementText is string && data.announcementText.size() <= 400)) &&
+      data.showAnnouncement is bool;
+    }
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email', 'role']) &&
+             data.keys().hasOnly(['email', 'role']) &&
+             data.email is string && data.email.size() <= 200 &&
+             data.role is string && data.role == 'admin';
+    }
+
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if resource.data.id is string;
+      allow create: if isValidId(productId) && isValidProduct(incoming()) && incoming().id == productId;
+      allow update: if isValidId(productId) && isValidProduct(incoming()) && incoming().id == existing().id && (
+        isAdmin() ||
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'slug', 'name', 'tagline', 'category', 'categoryLabel',
+          'type', 'power', 'maxSpl', 'freqResponse', 'ampClass',
+          'lfTransducer', 'hfTransducer', 'crossover', 'coverage',
+          'dspFeatures', 'dimensions', 'weight', 'voltage',
+          'inputOutput', 'images', 'videos', 'manualUrl',
+          'manualTitle', 'description', 'highlights', 'applications',
+          'isFeatured', 'updatedAt'
+        ])
+      );
+      allow delete: if isValidId(productId);
+    }
+
+    match /leads/{leadId} {
+      allow get: if isValidId(leadId);
+      allow list: if resource.data.id is string;
+      allow create: if isValidId(leadId) && isValidLead(incoming()) && incoming().id == leadId;
+      allow update: if isValidId(leadId) && isValidLead(incoming()) &&
+                    incoming().id == existing().id &&
+                    incoming().createdAt == existing().createdAt && (
+        isAdmin() ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+      );
+      allow delete: if isValidId(leadId);
+    }
+
+    match /site_config/{configId} {
+      allow get: if isValidId(configId);
+      allow list: if resource.data.contactEmail is string;
+      allow create: if isValidId(configId) && isValidSiteConfig(incoming());
+      allow update: if isValidId(configId) && isValidSiteConfig(incoming()) && (
+        isAdmin() ||
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'heroTitle', 'heroSubtitle', 'heroOriginText',
+          'contactWhatsapp', 'contactPhone', 'contactEmail',
+          'emergencyTechSupport', 'announcementText', 'showAnnouncement'
+        ])
+      );
+      allow delete: if isValidId(configId) && isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && isSignedIn() && request.auth.uid == adminId;
+      allow list: if false;
+      allow create: if isValidId(adminId) && isAdmin() && isValidAdmin(incoming());
+      allow update: if isValidId(adminId) && isValidAdmin(incoming()) && isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'role']);
+      allow delete: if isValidId(adminId) && isAdmin();
+    }
+  }
+}

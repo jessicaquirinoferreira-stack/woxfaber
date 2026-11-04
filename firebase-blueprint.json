@@ -1,0 +1,142 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Professional electroacoustic audio equipment in the WOX FABER catalog.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "slug": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "tagline": { "type": "string", "maxLength": 300 },
+        "category": {
+          "type": "string",
+          "enum": ["all", "caixas-ativas", "subwoofers", "amplificadores-rf", "processadores-rf", "microfones"]
+        },
+        "categoryLabel": { "type": "string", "maxLength": 120 },
+        "type": { "type": "string", "maxLength": 200 },
+        "power": { "type": "string", "maxLength": 100 },
+        "maxSpl": { "type": "string", "maxLength": 100 },
+        "freqResponse": { "type": "string", "maxLength": 200 },
+        "ampClass": { "type": "string", "maxLength": 200 },
+        "lfTransducer": { "type": "string", "maxLength": 200 },
+        "hfTransducer": { "type": "string", "maxLength": 200 },
+        "crossover": { "type": "string", "maxLength": 100 },
+        "coverage": { "type": "string", "maxLength": 100 },
+        "dspFeatures": { "type": "string", "maxLength": 500 },
+        "dimensions": { "type": "string", "maxLength": 120 },
+        "weight": { "type": "string", "maxLength": 80 },
+        "voltage": { "type": "string", "maxLength": 120 },
+        "inputOutput": { "type": "string", "maxLength": 250 },
+        "images": { "type": "array", "description": "List of Vercel Blob or public image URLs (max 20)." },
+        "videos": { "type": "array", "description": "List of Vercel Blob or public video URLs (max 10)." },
+        "manualUrl": { "type": "string", "maxLength": 1000 },
+        "manualTitle": { "type": "string", "maxLength": 250 },
+        "description": { "type": "string", "maxLength": 4000 },
+        "highlights": { "type": "array", "description": "Key technical highlights (max 15)." },
+        "applications": { "type": "array", "description": "Application scenarios (max 10)." },
+        "isFeatured": { "type": "boolean" }
+      },
+      "required": [
+        "id",
+        "slug",
+        "name",
+        "tagline",
+        "category",
+        "categoryLabel",
+        "type",
+        "power",
+        "maxSpl",
+        "freqResponse",
+        "ampClass",
+        "lfTransducer",
+        "dspFeatures",
+        "dimensions",
+        "weight",
+        "voltage",
+        "inputOutput",
+        "images",
+        "manualUrl",
+        "manualTitle",
+        "description",
+        "highlights",
+        "applications"
+      ]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Commercial or technical consultation lead submitted by a client.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "email": { "type": "string", "format": "email", "minLength": 3, "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "venueType": { "type": "string", "maxLength": 160 },
+        "message": { "type": "string", "maxLength": 3000 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productName": { "type": "string", "maxLength": 160 },
+        "status": {
+          "type": "string",
+          "enum": ["novo", "em_atendimento", "proposta_enviada", "fechado"]
+        },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "email", "phone", "venueType", "message", "status", "createdAt"]
+    },
+    "SiteConfig": {
+      "title": "SiteConfig",
+      "description": "Global site configuration and institutional copy for WOX FABER.",
+      "type": "object",
+      "properties": {
+        "heroTitle": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "heroSubtitle": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "heroOriginText": { "type": "string", "maxLength": 1200 },
+        "contactWhatsapp": { "type": "string", "maxLength": 60 },
+        "contactPhone": { "type": "string", "maxLength": 60 },
+        "contactEmail": { "type": "string", "maxLength": 200 },
+        "emergencyTechSupport": { "type": "string", "maxLength": 400 },
+        "announcementText": { "type": "string", "maxLength": 400 },
+        "showAnnouncement": { "type": "boolean" }
+      },
+      "required": [
+        "heroTitle",
+        "heroSubtitle",
+        "heroOriginText",
+        "contactWhatsapp",
+        "contactPhone",
+        "contactEmail",
+        "emergencyTechSupport",
+        "showAnnouncement"
+      ]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized administrator record.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 200 },
+        "role": { "type": "string", "enum": ["admin"] }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Real-time catalog of WOX FABER audio products."
+    },
+    "/leads/{leadId}": {
+      "schema": { "$ref": "#/entities/Lead" },
+      "description": "Technical consultation and commercial quote requests."
+    },
+    "/site_config/{configId}": {
+      "schema": { "$ref": "#/entities/SiteConfig" },
+      "description": "Global site configuration and hero texts."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Authorized administrators."
+    }
+  }
+}

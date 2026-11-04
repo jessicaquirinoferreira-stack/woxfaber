@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLeadModal }) => {
               <img
                 src="https://i.postimg.cc/ZRhSxQjQ/Logotipo-WOX-com-icone-de-energia.png"
                 alt="WOX FABER — Engineered Audio Solutions"
-                className="h-9 sm:h-11 w-auto max-w-[200px] object-contain filter drop-shadow-[0_2px_12px_rgba(199,166,106,0.3)] transition-transform duration-300 group-hover:scale-105"
+                className="h-9 sm:h-11 w-auto max-w-[200px] object-contain filter drop-shadow-[0_2px_12px_rgba(59,130,246,0.35)] transition-transform duration-300 group-hover:scale-105"
               />
             </div>
           </a>
@@ -78,13 +78,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLeadModal }) => {
                   href={link.href}
                   className={`text-xs uppercase tracking-[0.12em] font-medium transition-colors py-1 relative ${
                     isActive
-                      ? 'text-[#C7A66A] font-semibold'
+                      ? 'text-[#60A5FA] font-semibold'
                       : 'text-[#B8B8B8] hover:text-[#F5F5F2]'
                   }`}
                 >
                   {link.name}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#C7A66A] rounded-full" />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#2563EB] to-[#7EC2FB] rounded-full shadow-[0_0_8px_#3B82F6]" />
                   )}
                 </a>
               );
@@ -96,8 +96,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLeadModal }) => {
             {/* DSP 96kHz Active Indicator */}
             <div className="flex items-center gap-2 text-[11px] text-[#B8B8B8] font-mono px-3.5 py-1.5 rounded-full bg-[#101010] border border-white/[0.08]">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C7A66A] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C7A66A]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3B82F6]"></span>
               </span>
               <span className="tracking-wider">DSP 96kHz ACTIVE</span>
             </div>
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLeadModal }) => {
               className="btn-primary"
             >
               <span>Falar com Especialista</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="w-3.5 h-3.5 text-white" />
             </button>
           </div>
 
@@ -132,14 +132,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLeadModal }) => {
                 key={link.id}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-sm uppercase tracking-wider font-medium text-[#B8B8B8] hover:text-[#C7A66A] py-2.5 border-b border-white/5"
+                className="text-sm uppercase tracking-wider font-medium text-[#B8B8B8] hover:text-[#60A5FA] py-2.5 border-b border-white/5"
               >
                 {link.name}
               </a>
             ))}
             <div className="pt-4 flex flex-col gap-3">
               <div className="flex items-center gap-2 text-xs text-[#B8B8B8] font-mono py-1">
-                <span className="w-2 h-2 rounded-full bg-[#C7A66A] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
                 <span>DSP 96kHz ACTIVE · LABORATÓRIO WOX</span>
               </div>
               <button

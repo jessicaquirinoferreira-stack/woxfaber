@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, Mail, RefreshCw, ShieldCheck, ArrowUpRight, Clock, Check } from 'lucide-react';
+import { Wrench, Mail, RefreshCw, ShieldCheck, ArrowUpRight } from 'lucide-react';
 
 interface SupportSectionProps {
   onOpenLeadModal: (subject?: string) => void;
@@ -15,14 +15,14 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
           {/* Left Column: Manifesto & Highlights */}
           <div className="lg:col-span-6">
             <div className="inline-flex items-center gap-2.5 mb-3.5">
-              <span className="w-8 h-[1px] bg-[#C7A66A]" />
-              <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#C7A66A] font-semibold">
+              <span className="w-8 h-[1px] bg-gradient-to-r from-[#2563EB] to-[#7EC2FB]" />
+              <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#60A5FA] font-semibold">
                 Engenharia de Pós-Venda Sem Paralelo
               </span>
             </div>
             <h2 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl text-[#F5F5F2] tracking-tight uppercase leading-[1.08]">
               O Show Não Espera. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F5F5F2] via-[#E2C99A] to-[#C7A66A]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F5F5F2] via-[#7EC2FB] to-[#2563EB]">
                 Nosso Suporte Também Não.
               </span>
             </h2>
@@ -33,7 +33,7 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
 
             <div className="mt-10 space-y-7">
               <div className="flex items-start gap-4">
-                <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#C7A66A] shrink-0 mt-0.5">
+                <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#60A5FA] shrink-0 mt-0.5">
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
@@ -41,13 +41,13 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
                     Atendimento Direto por E-mail de Engenharia
                   </h3>
                   <p className="text-sm text-[#B8B8B8] font-normal mt-1 leading-relaxed">
-                    Você fala diretamente com especialistas em alinhamento de delay, acústica de recinto e ganho pelo e-mail oficial <span className="text-[#C7A66A] font-mono">woxfaberbrasil@gmail.com</span>.
+                    Você fala diretamente com especialistas em alinhamento de delay, acústica de recinto e ganho pelo e-mail oficial <span className="text-[#60A5FA] font-mono">woxfaberbrasil@gmail.com</span>.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#C7A66A] shrink-0 mt-0.5">
+                <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#60A5FA] shrink-0 mt-0.5">
                   <Wrench className="w-5 h-5" />
                 </div>
                 <div>
@@ -61,7 +61,7 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#C7A66A] shrink-0 mt-0.5">
+                <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#60A5FA] shrink-0 mt-0.5">
                   <RefreshCw className="w-5 h-5" />
                 </div>
                 <div>
@@ -88,7 +88,7 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
                 href="mailto:woxfaberbrasil@gmail.com?subject=Suporte%20T%C3%A9cnico%20e%20Garantia%20Modular%20-%20WOX%20FABER&body=Ol%C3%A1%20Engenharia%20WOX%20FABER%2C%0A%0APreciso%20de%20suporte%20t%C3%A9cnico%20ou%20orienta%C3%A7%C3%A3o%20de%20instala%C3%A7%C3%A3o."
                 className="btn-secondary"
               >
-                <Mail className="w-4 h-4 mr-1 text-[#C7A66A]" />
+                <Mail className="w-4 h-4 mr-1 text-[#60A5FA]" />
                 <span>E-mail de Suporte Técnico</span>
               </a>
             </div>
@@ -96,15 +96,15 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
 
           {/* Right Column: Visual Protocol Diagram */}
           <div className="lg:col-span-6">
-            <div className="card-premium p-8 sm:p-10 border border-[#C7A66A]/30 shadow-2xl">
+            <div className="card-premium p-8 sm:p-10 border border-[#3B82F6]/30 shadow-2xl">
               <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-[#C7A66A]" />
+                  <ShieldCheck className="w-5 h-5 text-[#60A5FA]" />
                   <span className="font-heading font-bold text-[#F5F5F2] text-sm tracking-wider uppercase">
                     Protocolo de Garantia Ininterrupta
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-[#C7A66A] bg-[#C7A66A]/10 px-2.5 py-1 rounded-[2px] border border-[#C7A66A]/30">
+                <span className="text-[10px] font-mono text-[#60A5FA] bg-[#2563EB]/15 px-2.5 py-1 rounded-[2px] border border-[#3B82F6]/30">
                   PLUG & PLAY SYSTEM
                 </span>
               </div>
@@ -113,7 +113,7 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
               <div className="mt-7 space-y-4">
                 <div className="p-4 rounded-[3px] bg-[#141414] border border-white/[0.06] flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono text-[#C7A66A] uppercase font-bold block mb-0.5">Passo 01</span>
+                    <span className="text-[10px] font-mono text-[#60A5FA] uppercase font-bold block mb-0.5">Passo 01</span>
                     <h4 className="text-sm font-heading font-bold text-[#F5F5F2]">Diagnóstico Técnico Remoto</h4>
                     <p className="text-xs text-[#B8B8B8] mt-0.5">Validação direta com engenheiro de aplicação via e-mail oficial (woxfaberbrasil@gmail.com).</p>
                   </div>
@@ -122,20 +122,20 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
 
                 <div className="p-4 rounded-[3px] bg-[#141414] border border-white/[0.06] flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono text-[#C7A66A] uppercase font-bold block mb-0.5">Passo 02</span>
+                    <span className="text-[10px] font-mono text-[#60A5FA] uppercase font-bold block mb-0.5">Passo 02</span>
                     <h4 className="text-sm font-heading font-bold text-[#F5F5F2]">Envio de Bloco Amplificador Novo</h4>
                     <p className="text-xs text-[#B8B8B8] mt-0.5">Módulo calibrado de fábrica despachado em regime de emergência.</p>
                   </div>
-                  <span className="text-xs font-mono text-[#C7A66A] font-bold ml-4 shrink-0">Same-Day</span>
+                  <span className="text-xs font-mono text-[#60A5FA] font-bold ml-4 shrink-0">Same-Day</span>
                 </div>
 
-                <div className="p-4 rounded-[3px] bg-gradient-to-r from-[#141414] to-[#1C1710] border border-[#C7A66A]/40 flex items-center justify-between">
+                <div className="p-4 rounded-[3px] bg-gradient-to-r from-[#141414] to-[#0D1A2D] border border-[#3B82F6]/40 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono text-[#C7A66A] uppercase font-bold block mb-0.5">Passo 03</span>
+                    <span className="text-[10px] font-mono text-[#60A5FA] uppercase font-bold block mb-0.5">Passo 03</span>
                     <h4 className="text-sm font-heading font-bold text-[#F5F5F2]">Substituição em 5 Minutos na Própria Caixa</h4>
                     <p className="text-xs text-[#B8B8B8] mt-0.5">Sem soldas. Conectores multipolares traváveis e parafusos de aço.</p>
                   </div>
-                  <span className="text-xs font-mono text-[#E2C99A] font-bold ml-4 shrink-0">Zero Oficina</span>
+                  <span className="text-xs font-mono text-[#7EC2FB] font-bold ml-4 shrink-0">Zero Oficina</span>
                 </div>
               </div>
 

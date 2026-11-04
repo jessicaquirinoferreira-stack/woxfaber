@@ -59,11 +59,11 @@ export const TechPillarsSection: React.FC = () => {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-20">
           <div className="inline-flex items-center gap-2.5 mb-3.5">
-            <span className="w-8 h-[1px] bg-[#C7A66A]" />
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#C7A66A] font-semibold">
+            <span className="w-8 h-[1px] bg-[#3B82F6]" />
+            <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#60A5FA] font-semibold">
               Arquitetura de Sistemas Eletroacústicos
             </span>
-            <span className="w-8 h-[1px] bg-[#C7A66A]" />
+            <span className="w-8 h-[1px] bg-[#3B82F6]" />
           </div>
           <h2 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl text-[#F5F5F2] tracking-tight uppercase leading-[1.08]">
             Os Pilares da Tecnologia WOX
@@ -86,15 +86,15 @@ export const TechPillarsSection: React.FC = () => {
                   {/* Top Bar with Number and Icon */}
                   <div className="flex items-center justify-between mb-8 pb-5 border-b border-white/[0.08]">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#C7A66A] group-hover:border-[#C7A66A]/50 transition-colors">
+                      <div className="w-11 h-11 rounded-[3px] bg-[#141414] border border-white/10 flex items-center justify-center text-[#3B82F6] group-hover:border-[#3B82F6]/50 transition-colors">
                         <Icon className="w-5 h-5" />
                       </div>
-                      <span className="text-xs font-mono text-[#C7A66A] uppercase font-semibold">
+                      <span className="text-xs font-mono text-[#60A5FA] uppercase font-semibold">
                         Pilar {pillar.num}
                       </span>
                     </div>
 
-                    <span className="text-3xl font-heading font-extrabold text-[#282828] group-hover:text-[#C7A66A]/40 transition-colors">
+                    <span className="text-3xl font-heading font-extrabold text-[#282828] group-hover:text-[#3B82F6]/40 transition-colors">
                       {pillar.num}
                     </span>
                   </div>
@@ -106,7 +106,7 @@ export const TechPillarsSection: React.FC = () => {
                   <h3 className="text-2xl font-bold font-heading text-[#F5F5F2] mb-2 leading-tight">
                     {pillar.title}
                   </h3>
-                  <p className="text-xs font-mono text-[#C7A66A] mb-5 uppercase tracking-wide">
+                  <p className="text-xs font-mono text-[#60A5FA] mb-5 uppercase tracking-wide">
                     {pillar.subtitle}
                   </p>
                   <p className="text-sm text-[#B8B8B8] leading-relaxed mb-8 font-normal">
@@ -117,13 +117,13 @@ export const TechPillarsSection: React.FC = () => {
                   <div className="p-4 rounded-[3px] bg-[#141414] border border-white/[0.08] mb-8">
                     <div className="flex justify-between text-[10px] font-mono text-[#B8B8B8] mb-2 uppercase">
                       <span>Diagrama de Laboratório</span>
-                      <span className="text-[#C7A66A]">{pillar.visualTag}</span>
+                      <span className="text-[#60A5FA]">{pillar.visualTag}</span>
                     </div>
 
                     {pillar.visualType === 'dispersion' && (
                       <div className="relative h-14 w-full bg-[#101010] rounded-[2px] flex items-center justify-center overflow-hidden">
                         {/* Horn Coverage Vector Cone */}
-                        <div className="w-24 h-10 border-t-2 border-r-2 border-[#C7A66A] rotate-45 opacity-70" />
+                        <div className="w-24 h-10 border-t-2 border-r-2 border-[#3B82F6] rotate-45 opacity-80" />
                         <span className="absolute text-[10px] font-mono text-[#F5F5F2]">Dispersão 90° Horizontal × 60° Vertical</span>
                       </div>
                     )}
@@ -133,7 +133,7 @@ export const TechPillarsSection: React.FC = () => {
                         {[15, 20, 18, 90, 85, 22, 19, 95, 88, 25, 20, 18, 92, 86, 21, 19].map((val, idx) => (
                           <div
                             key={idx}
-                            className={`flex-1 rounded-t-sm ${val > 50 ? 'bg-[#C7A66A]' : 'bg-[#252525]'}`}
+                            className={`flex-1 rounded-t-sm ${val > 50 ? 'bg-gradient-to-t from-[#2563EB] to-[#7EC2FB]' : 'bg-[#252525]'}`}
                             style={{ height: `${val}%` }}
                           />
                         ))}
@@ -143,10 +143,10 @@ export const TechPillarsSection: React.FC = () => {
                     {pillar.visualType === 'thermal' && (
                       <div className="relative h-14 w-full bg-[#101010] rounded-[2px] flex items-center justify-between px-4">
                         <div className="flex items-center gap-2">
-                          <ThermometerSnowflake className="w-5 h-5 text-[#C7A66A]" />
+                          <ThermometerSnowflake className="w-5 h-5 text-[#3B82F6]" />
                           <span className="text-xs font-mono text-[#F5F5F2]">Bobina 75mm (3")</span>
                         </div>
-                        <span className="text-[11px] font-mono text-[#C7A66A] font-bold">Convecção Passiva</span>
+                        <span className="text-[11px] font-mono text-[#60A5FA] font-bold">Convecção Passiva</span>
                       </div>
                     )}
                   </div>
@@ -157,7 +157,7 @@ export const TechPillarsSection: React.FC = () => {
                   <ul className="space-y-3">
                     {pillar.specs.map((spec, sIdx) => (
                       <li key={sIdx} className="flex items-start gap-2.5 text-xs text-[#E0E0DC]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C7A66A] mt-1.5 shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] mt-1.5 shrink-0" />
                         <span className="leading-relaxed">{spec}</span>
                       </li>
                     ))}

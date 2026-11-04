@@ -115,7 +115,7 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({
           r: 25,
           opacity: 0.9,
           speed: 4.8 + Math.random() * 2,
-          color: Math.random() > 0.4 ? '#C7A66A' : '#E2C99A',
+          color: Math.random() > 0.4 ? '#2563EB' : '#7EC2FB',
           lineWidth: Math.random() * 2 + 1,
         });
       }
@@ -149,7 +149,7 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({
         ctx.save();
         ctx.beginPath();
         ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = i === 1 ? 'rgba(199, 166, 106, 0.35)' : 'rgba(255, 255, 255, 0.07)';
+        ctx.strokeStyle = i === 1 ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.07)';
         ctx.lineWidth = 1;
         ctx.setLineDash([4 + i * 2, 8 + i * 2]);
         ctx.stroke();
@@ -166,7 +166,7 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        ctx.fillStyle = '#C7A66A';
+        ctx.fillStyle = '#60A5FA';
         ctx.globalAlpha = p.alpha;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -201,12 +201,12 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({
       {/* Main Center Stage: ONLY the Grand Free Logo & Effects */}
       <div className="relative z-10 flex flex-col items-center justify-center px-4 max-w-4xl w-full">
         {/* Pulsing Concentric Aura Rings */}
-        <div className="absolute w-[440px] h-[440px] sm:w-[600px] sm:h-[600px] rounded-full border border-[#C7A66A]/20 animate-pulse pointer-events-none" />
+        <div className="absolute w-[440px] h-[440px] sm:w-[600px] sm:h-[600px] rounded-full border border-[#3B82F6]/30 animate-pulse pointer-events-none" />
         <div className="absolute w-[300px] h-[300px] sm:w-[420px] sm:h-[420px] rounded-full border border-white/10 pointer-events-none" />
 
-        {/* Ambient Backlight Glow in Champagne Gold */}
+        {/* Ambient Backlight Glow in Electric Blue */}
         <div
-          className="absolute w-[360px] h-[360px] rounded-full bg-[#C7A66A]/20 blur-[100px] pointer-events-none transition-transform duration-500 ease-out"
+          className="absolute w-[360px] h-[360px] rounded-full bg-[#2563EB]/25 blur-[100px] pointer-events-none transition-transform duration-500 ease-out"
           style={{
             transform: `translate(${mousePos.x * 25}px, ${mousePos.y * 25}px)`,
           }}
@@ -222,23 +222,23 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({
           }}
         >
           {/* Energy Core Flares */}
-          <div className="absolute -inset-6 bg-gradient-to-r from-transparent via-[#C7A66A]/30 to-transparent blur-2xl opacity-90 animate-pulse pointer-events-none" />
+          <div className="absolute -inset-6 bg-gradient-to-r from-transparent via-[#3B82F6]/35 to-transparent blur-2xl opacity-90 animate-pulse pointer-events-none" />
 
           <img
             src={logoUrl}
             alt="WOX FABER"
-            className="relative z-10 w-full max-w-[340px] sm:max-w-[480px] md:max-w-[620px] h-auto object-contain filter drop-shadow-[0_0_40px_rgba(199,166,106,0.5)] drop-shadow-[0_20px_35px_rgba(0,0,0,0.95)]"
+            className="relative z-10 w-full max-w-[340px] sm:max-w-[480px] md:max-w-[620px] h-auto object-contain filter drop-shadow-[0_0_40px_rgba(59,130,246,0.6)] drop-shadow-[0_20px_35px_rgba(0,0,0,0.95)]"
           />
 
-          {/* Golden Horizontal Light Ray */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-[#C7A66A] to-transparent opacity-90 shadow-[0_0_16px_#C7A66A]" />
+          {/* Electric Blue Horizontal Light Ray */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-[#60A5FA] to-transparent opacity-90 shadow-[0_0_16px_#3B82F6]" />
         </div>
 
         {/* Elegant Loading Bar (No clutter text, purely the glowing bar filling up) */}
         <div className="mt-14 w-full max-w-md px-6">
           <div className="w-full h-1.5 bg-[#141414] rounded-full overflow-hidden border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.8)]">
             <div
-              className="h-full bg-gradient-to-r from-[#C7A66A] via-[#E2C99A] to-[#F5F5F2] transition-all duration-75 ease-out shadow-[0_0_14px_#C7A66A]"
+              className="h-full bg-gradient-to-r from-[#1D4ED8] via-[#3B82F6] to-[#7EC2FB] transition-all duration-75 ease-out shadow-[0_0_16px_#3B82F6]"
               style={{ width: `${progress}%` }}
             />
           </div>

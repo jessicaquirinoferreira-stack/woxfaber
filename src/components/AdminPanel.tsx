@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Product, Lead, SiteConfig, LeadStatus } from '../types';
 import { AudioStore } from '../services/store';
 import {
-  Lock,
+  uploadAttachmentToVercelBlob,
+  getStoredBlobToken,
+  setStoredBlobToken,
+} from '../services/blobService';
+import {
   LogOut,
   Users,
   Box,
@@ -18,7 +22,11 @@ import {
   X,
   Flame,
   Search,
-  Filter,
+  Upload,
+  Film,
+  FileText,
+  Database,
+  Cloud,
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -44,10 +52,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Active Tab: leads | products | config | lp-generator
   const [activeTab, setActiveTab] = useState<'leads' | 'products' | 'config' | 'lp-generator'>('leads');
 
-  // Leads and Products
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [config, setConfig] = useState<SiteConfig>(AudioStore.getConfig());
+  // Real-time Leads, Products, and Config from Firebase Firestore
+  const [leads, setLeads] = useState<Lead[]>(() => AudioStore.getLeads());
+  const [products, setProducts] = useState<Product[]>(() => AudioStore.getProducts());
+  const [config, setConfig] = useState<SiteConfig>(() => AudioStore.getConfig());
 
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,31 +66,59 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newPhotoList, setNewPhotoList] = useState<string[]>([]);
+  const [newVideoUrl, setNewVideoUrl] = useState('');
+  const [newVideoList, setNewVideoList] = useState<string[]>([]);
+
+  // Vercel Blob Upload state
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingManual, setIsUploadingManual] = useState(false);
+  const [blobToken, setBlobToken] = useState<string>(() => getStoredBlobToken());
 
   // Feedback notification banner
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setIsAuthenticated(AudioStore.isAuthenticated());
-      loadData();
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+    setIsAuthenticated(AudioStore.isAuthenticated());
 
-  const loadData = () => {
-    setLeads(AudioStore.getLeads());
-    setProducts(AudioStore.getProducts());
-    setConfig(AudioStore.getConfig());
-  };
+    // Subscribe to real-time Firestore collections
+    const unsubLeads = AudioStore.subscribeLeads(updatedLeads => {
+      setLeads(updatedLeads);
+    });
+    const unsubProducts = AudioStore.subscribeProducts(updatedProducts => {
+      setProducts(updatedProducts);
+    });
+    const unsubConfig = AudioStore.subscribeConfig(updatedConfig => {
+      setConfig(updatedConfig);
+    });
+
+    return () => {
+      unsubLeads();
+      unsubProducts();
+      unsubConfig();
+    };
+  }, [isOpen]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (AudioStore.login(email, password)) {
       setIsAuthenticated(true);
       setLoginError('');
-      loadData();
     } else {
       setLoginError('Credenciais incorretas. Verifique seu e-mail e chave de acesso.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const ok = await AudioStore.loginWithGoogle();
+      if (ok) {
+        setIsAuthenticated(true);
+        setLoginError('');
+      }
+    } catch {
+      setLoginError('Não foi possível autenticar via Google.');
     }
   };
 
@@ -93,21 +129,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const showNotification = (msg: string) => {
     setFeedback(msg);
-    setTimeout(() => setFeedback(null), 3000);
+    setTimeout(() => setFeedback(null), 4000);
   };
 
   const handleUpdateStatus = (id: string, status: LeadStatus) => {
     AudioStore.updateLeadStatus(id, status);
-    loadData();
-    showNotification('Status do lead atualizado no banco de dados.');
+    showNotification('Status do lead sincronizado em tempo real no Firebase Firestore.');
   };
 
   const handleDeleteLead = (id: string) => {
-    if (window.confirm('Confirma a remoção permanente deste lead do pipeline?')) {
-      AudioStore.deleteLead(id);
-      loadData();
-      showNotification('Lead excluído com sucesso.');
-    }
+    AudioStore.deleteLead(id);
+    showNotification('Lead removido em tempo real do Firebase Firestore.');
   };
 
   const handleExportCsv = () => {
@@ -147,6 +179,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       images: [
         'https://i.postimg.cc/jjmTwm06/Whats-App-Image-2026-11-04-at-11-29-39.jpg',
       ],
+      videos: [],
       manualUrl: '/assets/aistudio/Manual_KRS315A_WOX_FABER_337d8a70.pdf',
       manualTitle: 'Manual do Usuário Oficial (PDF)',
       description: 'Sistema acústico de engenharia refinada para alta pressão sonora contínua.',
@@ -161,12 +194,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setNewPhotoList([
       'https://i.postimg.cc/jjmTwm06/Whats-App-Image-2026-11-04-at-11-29-39.jpg',
     ]);
+    setNewVideoList([]);
   };
 
   const handleStartEditProduct = (p: Product) => {
     setIsCreatingProduct(false);
     setEditingProduct({ ...p });
-    setNewPhotoList([...p.images]);
+    setNewPhotoList([...(p.images || [])]);
+    setNewVideoList([...(p.videos || [])]);
   };
 
   const handleAddPhoto = () => {
@@ -181,6 +216,82 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setNewPhotoList(newPhotoList.filter((_, i) => i !== index));
   };
 
+  const handleAddVideoUrl = () => {
+    if (newVideoUrl.trim()) {
+      setNewVideoList([...newVideoList, newVideoUrl.trim()]);
+      setNewVideoUrl('');
+      showNotification('Vídeo adicionado à galeria do produto.');
+    }
+  };
+
+  const handleRemoveVideo = (index: number) => {
+    setNewVideoList(newVideoList.filter((_, i) => i !== index));
+  };
+
+  // Vercel Blob File Upload Handlers (Photos, Videos, PDF Manuals)
+  const handleUploadPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setIsUploadingPhoto(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const res = await uploadAttachmentToVercelBlob(files[i]);
+        uploadedUrls.push(res.url);
+      }
+      setNewPhotoList(prev => [...prev, ...uploadedUrls]);
+      showNotification(`${uploadedUrls.length} foto(s) enviada(s) via Vercel Blob com sucesso!`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro no upload da foto.';
+      showNotification(msg);
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleUploadVideoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setIsUploadingVideo(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const res = await uploadAttachmentToVercelBlob(files[i]);
+        uploadedUrls.push(res.url);
+      }
+      setNewVideoList(prev => [...prev, ...uploadedUrls]);
+      showNotification(`${uploadedUrls.length} vídeo(s) do produto enviado(s) via Vercel Blob com sucesso!`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro no upload do vídeo.';
+      showNotification(msg);
+    } finally {
+      setIsUploadingVideo(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleUploadManualFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingProduct) return;
+    setIsUploadingManual(true);
+    try {
+      const res = await uploadAttachmentToVercelBlob(file);
+      setEditingProduct({
+        ...editingProduct,
+        manualUrl: res.url,
+        manualTitle: file.name,
+      });
+      showNotification(`Manual PDF (${file.name}) enviado via Vercel Blob!`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro no upload do manual PDF.';
+      showNotification(msg);
+    } finally {
+      setIsUploadingManual(false);
+      e.target.value = '';
+    }
+  };
+
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
@@ -188,30 +299,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     const toSave: Product = {
       ...editingProduct,
       images: newPhotoList.length > 0 ? newPhotoList : editingProduct.images,
+      videos: newVideoList,
     };
 
     AudioStore.saveProduct(toSave);
     setEditingProduct(null);
     setIsCreatingProduct(false);
-    loadData();
     onProductUpdated();
-    showNotification(`Equipamento ${toSave.name} salvo com sucesso!`);
+    showNotification(`Equipamento ${toSave.name} salvo e sincronizado em tempo real via Firebase!`);
   };
 
   const handleDeleteProduct = (id: string) => {
-    if (window.confirm('Confirma a remoção permanente deste modelo da vitrine?')) {
-      AudioStore.deleteProduct(id);
-      loadData();
-      onProductUpdated();
-      showNotification('Produto removido do catálogo.');
-    }
+    AudioStore.deleteProduct(id);
+    onProductUpdated();
+    showNotification('Produto removido em tempo real do catálogo Firebase.');
   };
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
+    setStoredBlobToken(blobToken);
     AudioStore.saveConfig(config);
     onConfigUpdated();
-    showNotification('Configurações institucionais atualizadas com sucesso.');
+    showNotification('Configurações e Token Vercel Blob sincronizados em tempo real!');
   };
 
   // Filtered Leads
@@ -230,7 +339,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-black/90 backdrop-blur-md animate-fade-in">
       <div
-        className="relative w-full max-w-6xl bg-[#0A0A0A] border border-[#C7A66A]/40 rounded-[4px] shadow-2xl overflow-hidden my-4 flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-6xl bg-[#0A0A0A] border border-[#3B82F6]/40 rounded-[4px] shadow-2xl overflow-hidden my-4 flex flex-col max-h-[92vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="admin-dialog-title"
@@ -241,13 +350,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <img
               src="https://i.postimg.cc/ZRhSxQjQ/Logotipo-WOX-com-icone-de-energia.png"
               alt="WOX FABER"
-              className="h-8 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(199,166,106,0.3)]"
+              className="h-8 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(59,130,246,0.3)]"
             />
             <div className="border-l border-white/10 pl-3">
               <h2 id="admin-dialog-title" className="font-heading font-bold text-sm tracking-widest uppercase text-[#F5F5F2]">
-                Console SaaS de Engenharia & Gestão Comercial
+                Console SaaS em Tempo Real — Firebase & Vercel Blob
               </h2>
-              <span className="text-[10px] font-mono text-[#C7A66A]">WOX FABER AUDIOSUITE V2.4</span>
+              <span className="text-[10px] font-mono text-[#60A5FA]">WOX FABER AUDIOSUITE V3.0 REALTIME</span>
             </div>
           </div>
 
@@ -255,7 +364,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] bg-[#141414] border border-white/10 text-xs font-mono text-[#B8B8B8] hover:text-[#F5F5F2] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#141414] border border-white/10 text-xs font-mono text-[#B8B8B8] hover:text-[#F5F5F2] transition-colors cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5 text-red-400" />
                 <span>Desconectar</span>
@@ -264,7 +373,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-[3px] text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/5 transition-colors cursor-pointer"
+              className="p-1.5 rounded-full text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/5 transition-colors cursor-pointer"
               aria-label="Fechar painel"
             >
               <X className="w-5 h-5" />
@@ -274,8 +383,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
         {/* Feedback Alert Banner */}
         {feedback && (
-          <div className="bg-[#C7A66A]/15 border-b border-[#C7A66A]/30 px-6 py-2.5 flex items-center gap-2 text-xs font-mono text-[#C7A66A]">
-            <CheckCircle className="w-4 h-4 shrink-0" />
+          <div className="bg-[#2563EB]/20 border-b border-[#3B82F6]/40 px-6 py-2.5 flex items-center gap-2 text-xs font-mono text-[#7EC2FB]">
+            <CheckCircle className="w-4 h-4 shrink-0 text-[#60A5FA]" />
             <span>{feedback}</span>
           </div>
         )}
@@ -287,14 +396,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <img
                 src="https://i.postimg.cc/ZRhSxQjQ/Logotipo-WOX-com-icone-de-energia.png"
                 alt="WOX FABER Logotipo Oficial"
-                className="h-16 sm:h-20 w-auto object-contain filter drop-shadow-[0_4px_20px_rgba(199,166,106,0.35)]"
+                className="h-16 sm:h-20 w-auto object-contain filter drop-shadow-[0_4px_20px_rgba(59,130,246,0.35)]"
               />
             </div>
             <h3 className="font-heading font-extrabold text-2xl text-[#F5F5F2] uppercase mb-2">
               Autenticação de Acesso Restrito
             </h3>
             <p className="text-xs sm:text-sm text-[#B8B8B8] font-normal max-w-sm mb-8 leading-relaxed font-sans">
-              Painel restrito à diretoria de engenharia e operações comerciais da WOX FABER.
+              Painel conectado em tempo real ao Firebase Firestore e Vercel Blob Storage da WOX FABER.
             </p>
 
             <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4 text-left">
@@ -307,7 +416,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="admin@x.com"
-                  className="w-full px-3.5 py-3 rounded-[3px] bg-[#121212] border border-white/15 text-[#F5F5F2] text-sm focus:outline-none focus:border-[#C7A66A]"
+                  className="w-full px-3.5 py-3 rounded-[3px] bg-[#121212] border border-white/15 text-[#F5F5F2] text-sm focus:outline-none focus:border-[#3B82F6]"
                 />
               </div>
 
@@ -320,7 +429,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-3 rounded-[3px] bg-[#121212] border border-white/15 text-[#F5F5F2] text-sm focus:outline-none focus:border-[#C7A66A]"
+                  className="w-full px-3.5 py-3 rounded-[3px] bg-[#121212] border border-white/15 text-[#F5F5F2] text-sm focus:outline-none focus:border-[#3B82F6]"
                 />
               </div>
 
@@ -338,8 +447,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 Acessar Console de Engenharia
               </button>
 
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="btn-secondary w-full py-3 text-xs text-center"
+              >
+                Entrar com Conta Google (Firebase Auth)
+              </button>
+
               <div className="p-3 rounded-[3px] bg-[#121212] border border-white/[0.06] text-[10px] font-mono text-[#7A7A7A] text-center">
-                Acesso oficial: <span className="text-[#C7A66A]">admin@x.com</span> / Senha: <span className="text-[#C7A66A]">admin4321</span>
+                Acesso oficial: <span className="text-[#60A5FA]">admin@x.com</span> / Senha: <span className="text-[#60A5FA]">admin4321</span>
               </div>
             </form>
           </div>
@@ -352,7 +469,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setActiveTab('leads')}
                 className={`flex items-center gap-3 px-4 py-3 rounded-full text-xs font-mono uppercase tracking-wider transition-all text-left cursor-pointer ${
                   activeTab === 'leads'
-                    ? 'bg-[#C7A66A] text-[#080808] font-bold shadow-md'
+                    ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-md'
                     : 'text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/[0.04]'
                 }`}
               >
@@ -367,12 +484,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setActiveTab('products')}
                 className={`flex items-center gap-3 px-4 py-3 rounded-full text-xs font-mono uppercase tracking-wider transition-all text-left cursor-pointer ${
                   activeTab === 'products'
-                    ? 'bg-[#C7A66A] text-[#080808] font-bold shadow-md'
+                    ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-md'
                     : 'text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/[0.04]'
                 }`}
               >
                 <Box className="w-4 h-4 shrink-0" />
-                <span className="flex-1">Vitrine Produtos</span>
+                <span className="flex-1">Vitrine & Vídeos</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/25 font-bold">
                   {products.length}
                 </span>
@@ -382,11 +499,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setActiveTab('lp-generator')}
                 className={`flex items-center gap-3 px-4 py-3 rounded-full text-xs font-mono uppercase tracking-wider transition-all text-left cursor-pointer ${
                   activeTab === 'lp-generator'
-                    ? 'bg-[#C7A66A] text-[#080808] font-bold shadow-md'
+                    ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-md'
                     : 'text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/[0.04]'
                 }`}
               >
-                <Flame className="w-4 h-4 text-orange-400 shrink-0" />
+                <Flame className="w-4 h-4 text-[#7EC2FB] shrink-0" />
                 <span>Gerar Landing Page</span>
               </button>
 
@@ -394,12 +511,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setActiveTab('config')}
                 className={`flex items-center gap-3 px-4 py-3 rounded-full text-xs font-mono uppercase tracking-wider transition-all text-left cursor-pointer ${
                   activeTab === 'config'
-                    ? 'bg-[#C7A66A] text-[#080808] font-bold shadow-md'
+                    ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-md'
                     : 'text-[#B8B8B8] hover:text-[#F5F5F2] hover:bg-white/[0.04]'
                 }`}
               >
                 <Settings className="w-4 h-4 shrink-0" />
-                <span>Controle Geral</span>
+                <span>Controle & Cloud</span>
               </button>
             </div>
 
@@ -411,10 +528,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/[0.08] gap-4 mb-8">
                     <div>
                       <h3 className="font-heading font-extrabold text-2xl text-[#F5F5F2] uppercase">
-                        Pipeline de Oportunidades & Leads
+                        Pipeline de Oportunidades & Leads (Firebase Real-Time)
                       </h3>
                       <p className="text-xs font-mono text-[#B8B8B8] mt-1">
-                        {leads.length} solicitações registradas e monitoradas
+                        {leads.length} solicitações sincronizadas em tempo real
                       </p>
                     </div>
 
@@ -423,7 +540,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={handleExportCsv}
                         className="btn-technical py-2.5 px-4"
                       >
-                        <Download className="w-4 h-4 text-[#C7A66A]" />
+                        <Download className="w-4 h-4 text-[#60A5FA]" />
                         <span>Exportar CSV</span>
                       </button>
                     </div>
@@ -439,13 +556,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                     <div className="p-4 rounded-[3px] bg-[#101010] border border-white/[0.06]">
                       <span className="text-[10px] font-mono text-[#B8B8B8] uppercase block mb-1">Em Atendimento</span>
-                      <div className="text-2xl font-bold font-heading text-[#64B5F6]">
+                      <div className="text-2xl font-bold font-heading text-[#60A5FA]">
                         {leads.filter(l => l.status === 'em_atendimento').length}
                       </div>
                     </div>
                     <div className="p-4 rounded-[3px] bg-[#101010] border border-white/[0.06]">
                       <span className="text-[10px] font-mono text-[#B8B8B8] uppercase block mb-1">Propostas Enviadas</span>
-                      <div className="text-2xl font-bold font-heading text-[#C7A66A]">
+                      <div className="text-2xl font-bold font-heading text-[#7EC2FB]">
                         {leads.filter(l => l.status === 'proposta_enviada').length}
                       </div>
                     </div>
@@ -465,15 +582,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="text"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        placeholder="Buscar por nome, e-mail, telefone ou tipo de local..."
-                        className="w-full pl-10 pr-4 py-2.5 rounded-[3px] bg-[#121212] border border-white/10 text-xs text-[#F5F5F2] placeholder-[#7A7A7A] focus:outline-none focus:border-[#C7A66A]"
+                        placeholder="Buscar por nome, e-mail ou tipo de local..."
+                        className="w-full pl-10 pr-4 py-2.5 rounded-[3px] bg-[#121212] border border-white/10 text-xs text-[#F5F5F2] placeholder-[#7A7A7A] focus:outline-none focus:border-[#3B82F6]"
                       />
                     </div>
 
                     <select
                       value={statusFilter}
                       onChange={e => setStatusFilter(e.target.value)}
-                      className="px-4 py-2.5 rounded-[3px] bg-[#121212] border border-white/10 text-xs font-mono uppercase text-[#F5F5F2] focus:outline-none focus:border-[#C7A66A]"
+                      className="px-4 py-2.5 rounded-[3px] bg-[#121212] border border-white/10 text-xs font-mono uppercase text-[#F5F5F2] focus:outline-none focus:border-[#3B82F6]"
                     >
                       <option value="all">Todos os Status</option>
                       <option value="novo">Novo</option>
@@ -504,21 +621,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             </td>
                             <td className="p-3.5">
                               <span className="text-[#F5F5F2] font-semibold block">{lead.name}</span>
-                              <a href={`mailto:${lead.email}`} className="text-[#B8B8B8] hover:text-[#C7A66A] text-[11px] block font-mono">
+                              <a href={`mailto:${lead.email}`} className="text-[#B8B8B8] hover:text-[#60A5FA] text-[11px] block font-mono">
                                 {lead.email}
                               </a>
-                              {lead.phone && <span className="text-[#7A7A7A] text-[11px] block">{lead.phone}</span>}
                             </td>
                             <td className="p-3.5 text-[#E0E0DC]">{lead.venueType}</td>
                             <td className="p-3.5">
-                              <span className="text-[#C7A66A] font-semibold">{lead.productName || 'Geral'}</span>
+                              <span className="text-[#60A5FA] font-semibold">{lead.productName || 'Geral'}</span>
                               <p className="text-[11px] text-[#B8B8B8] mt-1 max-w-xs line-clamp-2">{lead.message}</p>
                             </td>
                             <td className="p-3.5">
                               <select
                                 value={lead.status}
                                 onChange={e => handleUpdateStatus(lead.id, e.target.value as LeadStatus)}
-                                className="px-2.5 py-1.5 rounded-[2px] bg-[#181818] border border-white/10 text-[10px] uppercase font-mono text-[#F5F5F2] focus:outline-none focus:border-[#C7A66A]"
+                                className="px-2.5 py-1.5 rounded-[2px] bg-[#181818] border border-white/10 text-[10px] uppercase font-mono text-[#F5F5F2] focus:outline-none focus:border-[#3B82F6]"
                               >
                                 <option value="novo">Novo</option>
                                 <option value="em_atendimento">Em Atendimento</option>
@@ -543,16 +659,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               )}
 
-              {/* TAB 2: PRODUCTS */}
+              {/* TAB 2: PRODUCTS (WITH VERCEL BLOB PHOTO, VIDEO & PDF UPLOADS) */}
               {activeTab === 'products' && (
                 <div>
                   <div className="flex items-center justify-between pb-6 border-b border-white/[0.08] mb-8">
                     <div>
                       <h3 className="font-heading font-extrabold text-2xl text-[#F5F5F2] uppercase">
-                        Gestão da Vitrine de Produtos
+                        Vitrine de Produtos, Vídeos & Anexos (Vercel Blob)
                       </h3>
                       <p className="text-xs font-mono text-[#B8B8B8] mt-1">
-                        Cadastre novos modelos, gerencie fotografias e manuais de laboratório
+                        Envie fotos, vídeos (.mp4/.webm/.mov) e manuais em PDF diretamente via Vercel Blob com sincronização Firebase em tempo real
                       </p>
                     </div>
 
@@ -567,7 +683,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   {editingProduct ? (
                     /* Edit/Create Form */
-                    <form onSubmit={handleSaveProduct} className="p-7 rounded-[4px] bg-[#101010] border border-[#C7A66A]/30 space-y-5">
+                    <form onSubmit={handleSaveProduct} className="p-7 rounded-[4px] bg-[#101010] border border-[#3B82F6]/30 space-y-6">
                       <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
                         <h4 className="font-heading font-bold text-lg text-[#F5F5F2] uppercase">
                           {isCreatingProduct ? 'Cadastrar Novo Modelo' : `Editar ${editingProduct.name}`}
@@ -589,7 +705,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             required
                             value={editingProduct.name}
                             onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                           />
                         </div>
 
@@ -600,7 +716,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             required
                             value={editingProduct.tagline}
                             onChange={e => setEditingProduct({ ...editingProduct, tagline: e.target.value })}
-                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                           />
                         </div>
 
@@ -610,7 +726,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             type="text"
                             value={editingProduct.power}
                             onChange={e => setEditingProduct({ ...editingProduct, power: e.target.value })}
-                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                           />
                         </div>
 
@@ -620,30 +736,45 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             type="text"
                             value={editingProduct.maxSpl}
                             onChange={e => setEditingProduct({ ...editingProduct, maxSpl: e.target.value })}
-                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                            className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                           />
                         </div>
                       </div>
 
-                      {/* Photo Gallery (Vercel Blob / URLs) */}
+                      {/* 1. Photo Gallery (Vercel Blob Upload + URLs) */}
                       <div className="pt-4 border-t border-white/[0.08]">
-                        <label className="block text-xs font-mono uppercase text-[#C7A66A] font-semibold mb-2">
-                          Galeria de Fotografias (Vercel Blob / CDN URLs)
-                        </label>
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                          <label className="block text-xs font-mono uppercase text-[#60A5FA] font-semibold">
+                            1. Galeria de Fotografias (Vercel Blob Storage)
+                          </label>
+                          <label className="btn-primary !py-2 !px-4 text-xs cursor-pointer">
+                            <Upload className="w-3.5 h-3.5 mr-1" />
+                            <span>{isUploadingPhoto ? 'Enviando para Vercel Blob...' : 'Subir Fotos do Computador'}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleUploadPhotoFile}
+                              disabled={isUploadingPhoto}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
                         <div className="flex gap-2.5 mb-4">
                           <input
                             type="url"
-                            placeholder="Insira a URL de uma foto de alta resolução..."
+                            placeholder="Ou cole a URL direta de uma foto..."
                             value={newPhotoUrl}
                             onChange={e => setNewPhotoUrl(e.target.value)}
-                            className="flex-1 p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                            className="flex-1 p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                           />
                           <button
                             type="button"
                             onClick={handleAddPhoto}
                             className="btn-technical py-3 px-4"
                           >
-                            Adicionar Foto
+                            Adicionar URL
                           </button>
                         </div>
 
@@ -664,13 +795,112 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                       </div>
 
+                      {/* 2. Product Videos (Vercel Blob Upload + URLs) */}
+                      <div className="pt-4 border-t border-white/[0.08]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                          <label className="flex items-center gap-2 text-xs font-mono uppercase text-[#7EC2FB] font-semibold">
+                            <Film className="w-4 h-4 text-[#60A5FA]" />
+                            <span>2. Vídeos do Produto — MP4 / WebM / MOV (Vercel Blob Storage)</span>
+                          </label>
+                          <label className="btn-primary !py-2 !px-4 text-xs cursor-pointer">
+                            <Upload className="w-3.5 h-3.5 mr-1" />
+                            <span>{isUploadingVideo ? 'Subindo Vídeo para Vercel Blob...' : 'Subir Vídeo do Produto'}</span>
+                            <input
+                              type="file"
+                              accept="video/mp4,video/webm,video/quicktime,video/*"
+                              multiple
+                              onChange={handleUploadVideoFile}
+                              disabled={isUploadingVideo}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
+                        <div className="flex gap-2.5 mb-4">
+                          <input
+                            type="url"
+                            placeholder="Ou insira a URL de um vídeo (.mp4 / .webm / Vercel Blob)..."
+                            value={newVideoUrl}
+                            onChange={e => setNewVideoUrl(e.target.value)}
+                            className="flex-1 p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddVideoUrl}
+                            className="btn-technical py-3 px-4"
+                          >
+                            Adicionar Vídeo
+                          </button>
+                        </div>
+
+                        {newVideoList.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {newVideoList.map((vidUrl, i) => (
+                              <div key={i} className="relative rounded-[3px] bg-[#080808] border border-[#3B82F6]/30 p-2">
+                                <video
+                                  src={vidUrl}
+                                  controls
+                                  playsInline
+                                  className="w-full h-40 object-cover rounded bg-black"
+                                />
+                                <div className="flex items-center justify-between mt-2 px-1">
+                                  <span className="text-[10px] font-mono text-[#7EC2FB] truncate max-w-[200px]">
+                                    Vídeo #{i + 1} · {vidUrl}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveVideo(i)}
+                                    className="text-xs font-mono text-red-400 hover:underline cursor-pointer"
+                                  >
+                                    Remover
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] font-mono text-[#7A7A7A]">
+                            Nenhum vídeo cadastrado ainda para este produto. Clique em &ldquo;Subir Vídeo do Produto&rdquo; para enviar pelo Vercel Blob.
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 3. Technical Manual PDF (Vercel Blob Upload) */}
+                      <div className="pt-4 border-t border-white/[0.08]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                          <label className="flex items-center gap-2 text-xs font-mono uppercase text-[#60A5FA] font-semibold">
+                            <FileText className="w-4 h-4 text-[#60A5FA]" />
+                            <span>3. Manual Técnico em PDF (Vercel Blob Storage)</span>
+                          </label>
+                          <label className="btn-technical py-2 px-4 text-xs cursor-pointer">
+                            <Upload className="w-3.5 h-3.5 mr-1 text-[#60A5FA]" />
+                            <span>{isUploadingManual ? 'Enviando PDF...' : 'Subir Novo PDF via Vercel Blob'}</span>
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              onChange={handleUploadManualFile}
+                              disabled={isUploadingManual}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
+                        <input
+                          type="text"
+                          value={editingProduct.manualUrl}
+                          onChange={e => setEditingProduct({ ...editingProduct, manualUrl: e.target.value })}
+                          placeholder="URL do Manual PDF..."
+                          className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
+                        />
+                      </div>
+
                       <div>
                         <label className="block text-xs font-mono uppercase text-[#B8B8B8] mb-1.5">Descrição Técnica</label>
                         <textarea
                           rows={3}
                           value={editingProduct.description}
                           onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                          className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                          className="w-full p-3 rounded-[3px] bg-[#141414] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                         />
                       </div>
 
@@ -679,7 +909,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           type="submit"
                           className="btn-primary"
                         >
-                          Salvar Alterações
+                          Salvar & Publicar em Tempo Real
                         </button>
                         <button
                           type="button"
@@ -700,9 +930,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               <img src={prod.images[0]} alt={prod.name} className="max-h-full max-w-full object-contain" />
                             </div>
                             <div>
-                              <span className="text-[10px] font-mono text-[#C7A66A] uppercase">{prod.categoryLabel}</span>
+                              <span className="text-[10px] font-mono text-[#60A5FA] uppercase">{prod.categoryLabel}</span>
                               <h4 className="font-heading font-bold text-lg text-[#F5F5F2]">{prod.name}</h4>
-                              <span className="text-xs font-mono text-[#B8B8B8]">{prod.power} · {prod.maxSpl}</span>
+                              <div className="flex items-center gap-2 text-xs font-mono text-[#B8B8B8]">
+                                <span>{prod.power} · {prod.maxSpl}</span>
+                                {prod.videos && prod.videos.length > 0 && (
+                                  <span className="px-2 py-0.5 rounded-full bg-[#2563EB]/20 border border-[#3B82F6]/40 text-[#7EC2FB] text-[10px]">
+                                    {prod.videos.length} vídeo(s)
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
 
@@ -710,7 +947,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <button
                               onClick={() => handleStartEditProduct(prod)}
                               className="btn-technical p-2"
-                              title="Editar produto"
+                              title="Editar produto, fotos e vídeos"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
@@ -734,7 +971,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <div>
                   <div className="pb-6 border-b border-white/[0.08] mb-8">
                     <h3 className="font-heading font-extrabold text-2xl text-[#F5F5F2] uppercase flex items-center gap-2">
-                      <Flame className="w-5 h-5 text-[#C7A66A]" />
+                      <Flame className="w-5 h-5 text-[#60A5FA]" />
                       <span>Gerador Automático de Landing Pages Exclusivas</span>
                     </h3>
                     <p className="text-xs font-mono text-[#B8B8B8] mt-1">
@@ -744,22 +981,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {products.map(prod => {
-                      const lpUrl = `${window.location.origin}${window.location.pathname}?lp=${prod.slug}`;
+                      const lpUrl = `https://woxfaber.com.br/?lp=${prod.slug}`;
                       return (
                         <div key={prod.id} className="p-6 rounded-[4px] bg-[#101010] border border-white/[0.08] flex flex-col justify-between">
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-[10px] font-mono text-[#C7A66A] uppercase tracking-wider font-semibold">
+                              <span className="text-[10px] font-mono text-[#60A5FA] uppercase tracking-wider font-semibold">
                                 LANDING PAGE ATIVA
                               </span>
                               <span className="text-[10px] font-mono text-[#7A7A7A]">
-                                3D INTERATIVO INCLUSO
+                                3D + VÍDEOS INCLUSOS
                               </span>
                             </div>
                             <h4 className="font-heading font-bold text-2xl text-[#F5F5F2] mb-1">
                               {prod.name}
                             </h4>
-                            <p className="text-xs text-[#C7A66A] font-mono mb-4">{prod.tagline}</p>
+                            <p className="text-xs text-[#60A5FA] font-mono mb-4">{prod.tagline}</p>
                             <div className="p-3 rounded-[3px] bg-[#080808] border border-white/5 font-mono text-[11px] text-[#B8B8B8] break-all mb-5">
                               {lpUrl}
                             </div>
@@ -781,7 +1018,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               }}
                               className="btn-technical py-2.5 px-4"
                             >
-                              <Share2 className="w-3.5 h-3.5 text-[#C7A66A]" />
+                              <Share2 className="w-3.5 h-3.5 text-[#60A5FA]" />
                               <span>Copiar</span>
                             </button>
                           </div>
@@ -792,16 +1029,62 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               )}
 
-              {/* TAB 4: SITE CONFIG */}
+              {/* TAB 4: SITE CONFIG + FIREBASE & VERCEL BLOB STATUS */}
               {activeTab === 'config' && (
-                <form onSubmit={handleSaveConfig} className="space-y-5">
+                <form onSubmit={handleSaveConfig} className="space-y-6">
                   <div className="pb-6 border-b border-white/[0.08] mb-6">
                     <h3 className="font-heading font-extrabold text-2xl text-[#F5F5F2] uppercase">
-                      Controle Geral do Portal & Contatos Oficiais
+                      Controle Geral, Firebase Real-Time & Vercel Blob
                     </h3>
                     <p className="text-xs font-mono text-[#B8B8B8] mt-1">
-                      Gerencie textos institucionais e o e-mail oficial de recebimento de cotações (woxfaberbrasil@gmail.com)
+                      Todas as alterações são propagadas instantaneamente em tempo real para todos os visitantes via Firebase Firestore
                     </p>
+                  </div>
+
+                  {/* Cloud Infrastructure Status Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-[4px] bg-[#101010] border border-[#3B82F6]/30 flex items-start gap-3">
+                      <Database className="w-5 h-5 text-[#60A5FA] shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-[#7EC2FB] font-bold block">
+                          FIREBASE FIRESTORE REAL-TIME
+                        </span>
+                        <p className="text-xs text-[#F5F5F2] font-semibold mt-0.5">
+                          Conectado & Sincronizando em Tempo Real
+                        </p>
+                        <p className="text-[11px] text-[#B8B8B8] mt-1">
+                          Coleções ativas: <code className="text-[#60A5FA]">products</code>, <code className="text-[#60A5FA]">leads</code>, <code className="text-[#60A5FA]">siteConfig</code>.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-[4px] bg-[#101010] border border-[#3B82F6]/30 flex items-start gap-3">
+                      <Cloud className="w-5 h-5 text-[#60A5FA] shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-[#7EC2FB] font-bold block">
+                          VERCEL BLOB STORAGE (@vercel/blob)
+                        </span>
+                        <p className="text-xs text-[#F5F5F2] font-semibold mt-0.5">
+                          Endpoint <code className="text-[#60A5FA]">/api/blob</code> Ativo
+                        </p>
+                        <p className="text-[11px] text-[#B8B8B8] mt-1">
+                          Suporta upload direto de fotos, vídeos de produtos e manuais em PDF.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-[#60A5FA] mb-1.5">
+                      Token Vercel Blob (`BLOB_READ_WRITE_TOKEN` — Opcional se já configurado nas variáveis da Vercel)
+                    </label>
+                    <input
+                      type="password"
+                      value={blobToken}
+                      onChange={e => setBlobToken(e.target.value)}
+                      placeholder="vercel_blob_rw_... (Automático na Vercel via variável de ambiente)"
+                      className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
+                    />
                   </div>
 
                   <div>
@@ -810,7 +1093,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       type="text"
                       value={config.heroTitle}
                       onChange={e => setConfig({ ...config, heroTitle: e.target.value })}
-                      className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                      className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                     />
                   </div>
 
@@ -820,7 +1103,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       rows={2}
                       value={config.heroSubtitle}
                       onChange={e => setConfig({ ...config, heroSubtitle: e.target.value })}
-                      className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                      className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                     />
                   </div>
 
@@ -831,7 +1114,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="email"
                         value={config.contactEmail}
                         onChange={e => setConfig({ ...config, contactEmail: e.target.value })}
-                        className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                        className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                       />
                     </div>
 
@@ -841,7 +1124,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="text"
                         value={config.emergencyTechSupport}
                         onChange={e => setConfig({ ...config, emergencyTechSupport: e.target.value })}
-                        className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#C7A66A]"
+                        className="w-full p-3 rounded-[3px] bg-[#121212] border border-white/10 text-[#F5F5F2] text-xs font-mono focus:border-[#3B82F6]"
                       />
                     </div>
                   </div>
@@ -851,7 +1134,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       type="submit"
                       className="btn-primary"
                     >
-                      Salvar Configurações
+                      Salvar Configurações em Tempo Real
                     </button>
                   </div>
                 </form>

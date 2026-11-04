@@ -76,9 +76,9 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
     });
     materials.push(grilleMaterial);
 
-    // 3. Champagne Gold Accent Metal Material (WOX Emblem & Screws)
+    // 3. Electric Cobalt Blue Accent Metal Material (WOX Emblem & Screws)
     const goldMaterial = new THREE.MeshStandardMaterial({
-      color: 0xC9A96E,
+      color: 0x2563EB,
       roughness: 0.28,
       metalness: 0.88,
     });
@@ -290,8 +290,8 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
     keyLight.castShadow = true;
     scene.add(keyLight);
 
-    // 2. Warm Champagne Gold Rim Light
-    const rimLight = new THREE.DirectionalLight(0xC9A96E, 2.8);
+    // 2. Electric Cobalt Blue Rim Light
+    const rimLight = new THREE.DirectionalLight(0x2563EB, 3.2);
     rimLight.position.set(-4, 2, -3);
     scene.add(rimLight);
 
@@ -428,18 +428,18 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
       {/* Top Studio HUD Bar */}
       <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-black/70 border border-white/10 backdrop-blur-md">
-          <span className="w-2 h-2 rounded-full bg-[#C9A96E] animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
           <span className="text-[11px] font-mono tracking-wider text-white uppercase">
             3D STUDIO · {product.name}
           </span>
-          <span className="text-[10px] font-mono text-[#C9A96E]">96kHz DSP CHASSIS</span>
+          <span className="text-[10px] font-mono text-[#60A5FA]">96kHz DSP CHASSIS</span>
         </div>
 
         <div className="flex items-center gap-2 pointer-events-auto">
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1.5 rounded-sm bg-neutral-900 border border-white/10 text-neutral-400 hover:text-white hover:border-[#C9A96E] transition-colors"
+              className="p-1.5 rounded-sm bg-neutral-900 border border-white/10 text-neutral-400 hover:text-white hover:border-[#3B82F6] transition-colors"
               aria-label="Fechar visualizador 3D"
             >
               <X className="w-4 h-4" />
@@ -461,7 +461,7 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
           <button
             onClick={() => applyPreset('hero')}
             className={`px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded-sm transition-all ${
-              activePreset === 'hero' ? 'bg-[#C9A96E] text-black font-bold' : 'text-neutral-400 hover:text-white'
+              activePreset === 'hero' ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-neutral-400 hover:text-white'
             }`}
           >
             Perspectiva
@@ -469,7 +469,7 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
           <button
             onClick={() => applyPreset('rear')}
             className={`px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded-sm transition-all ${
-              activePreset === 'rear' ? 'bg-[#C9A96E] text-black font-bold' : 'text-neutral-400 hover:text-white'
+              activePreset === 'rear' ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-neutral-400 hover:text-white'
             }`}
           >
             Painel DSP Traseiro
@@ -477,7 +477,7 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
           <button
             onClick={() => applyPreset('woofer')}
             className={`px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded-sm transition-all ${
-              activePreset === 'woofer' ? 'bg-[#C9A96E] text-black font-bold' : 'text-neutral-400 hover:text-white'
+              activePreset === 'woofer' ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-neutral-400 hover:text-white'
             }`}
           >
             Transdutor LF
@@ -486,7 +486,7 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
             <button
               onClick={() => applyPreset('horn')}
               className={`px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded-sm transition-all ${
-                activePreset === 'horn' ? 'bg-[#C9A96E] text-black font-bold' : 'text-neutral-400 hover:text-white'
+                activePreset === 'horn' ? 'bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-bold shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-neutral-400 hover:text-white'
               }`}
             >
               Corneta 90°×60°
@@ -500,7 +500,7 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
             onClick={() => setAutoRotate(!autoRotate)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-[11px] font-mono uppercase tracking-wider transition-all backdrop-blur-md ${
               autoRotate
-                ? 'bg-[#C9A96E]/15 border-[#C9A96E] text-[#C9A96E]'
+                ? 'bg-[#2563EB]/25 border-[#3B82F6] text-[#7EC2FB]'
                 : 'bg-black/80 border-white/10 text-neutral-400 hover:text-white'
             }`}
           >
@@ -512,7 +512,7 @@ export const Product3DViewer: React.FC<Product3DViewerProps> = ({ product, onClo
             onClick={() => setWireframe(!wireframe)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-[11px] font-mono uppercase tracking-wider transition-all backdrop-blur-md ${
               wireframe
-                ? 'bg-[#C9A96E]/20 border-[#C9A96E] text-[#C9A96E]'
+                ? 'bg-[#2563EB]/30 border-[#3B82F6] text-[#7EC2FB]'
                 : 'bg-black/80 border-white/10 text-neutral-400 hover:text-white'
             }`}
           >
