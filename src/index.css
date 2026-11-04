@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --black-main: #080808;
+    --black-sec: #101010;
+    --graphite: #181818;
+    --graphite-light: #242424;
+    --gold-main: #C7A66A;
+    --gold-light: #E2C99A;
+    --gold-dark: #A58548;
+    --white-ice: #F5F5F2;
+    --gray-text: #B8B8B8;
+    --gray-muted: #7A7A7A;
+  }
+
+  body {
+    font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #080808;
+    color: #F5F5F2;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, h4, h5, .font-heading {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.03em;
+  }
+
+  code, pre, .font-mono, .telemetry {
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Custom elite luxury scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+::-webkit-scrollbar-thumb {
+  background: #242424;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C7A66A;
+}
+
+/* Reusable Rounded Button System */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #C7A66A 0%, #D4B67C 50%, #B89658 100%);
+  color: #080808;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 18px rgba(199, 166, 106, 0.22);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(199, 166, 106, 0.36);
+  filter: brightness(1.04);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  color: #F5F5F2;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(199, 166, 106, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.btn-secondary:hover {
+  background-color: #181818;
+  border-color: #C7A66A;
+  color: #E2C99A;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+.btn-technical {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  background-color: #141414;
+  color: #B8B8B8;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.5rem 1.125rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.btn-technical:hover {
+  background-color: #1c1c1c;
+  color: #F5F5F2;
+  border-color: rgba(199, 166, 106, 0.4);
+}
+
+/* Subtle luxury card styling */
+.card-premium {
+  background-color: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-premium:hover {
+  border-color: rgba(199, 166, 106, 0.35);
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(199, 166, 106, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Hairline borders */
+.hairline-gold {
+  border: 1px solid rgba(199, 166, 106, 0.28);
+}
+.hairline-subtle {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Subtle Technical Grid Overlay */
+.bg-tech-grid {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* prefers-reduced-motion compliance */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

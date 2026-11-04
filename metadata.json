@@ -1,0 +1,6 @@
+{
+  "name": "WOX FABER — Engineered Audio Solutions",
+  "description": "Engenharia acústica de precisão, caixas ativas de 3000W, subwoofers e sistemas de som profissional de nível mundial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
